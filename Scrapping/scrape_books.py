@@ -101,7 +101,15 @@ for page in range(1, 51):
     soup = BeautifulSoup(response.content, 'html.parser')
     extract_data_from_page(soup, page)
 
+    # testing
+    print(f"Total books scraped: {len(books)}")
+
 # Save to CSV
 df = pd.DataFrame(books)
+df = df.head()
 df.to_csv('data_sheet/books_data.csv', index=False)
 print("Data saved to data_sheet/books_data.csv")
+
+# ✅ Generate XML
+from generate_xml import generate_xml_from_csv
+generate_xml_from_csv("data_sheet/books_data.csv")

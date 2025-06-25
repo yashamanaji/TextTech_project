@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Book Catalog Query</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #34495e;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    h1, h2 {
+      margin-top: 0;
+    }
+
+    label {
+      font-weight: 600;
+    }
+
+    input {
+      margin-bottom: 20px;
+      padding: 10px;
+      width: 100%;
+      max-width: 300px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #27ae60;
+    }
+
+    .book {
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .book img.thumbnail {
+      max-height: 130px;
+      border-radius: 6px;
+    }
+
+    .book-details {
+      flex: 1;
+    }
+
+    .book h3 {
+      margin: 0 0 10px 0;
+    }
+
+    .meta {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Book Catalog Query</h1>
+</header>
+
+<div class="container">
+  <label>Genre:</label><br>
+  <input type="text" id="genre" placeholder="e.g. Fantasy" /><br>
+  
+  <label>Minimum Confidence:</label><br>
+  <input type="number" id="min_conf" step="0.01" value="0.8" /><br>
+  
+  <button onclick="queryBooks()">Search</button>
+
+  <h2>Results</h2>
+  <div id="results"></div>
+</div>
+
+<script>
+  function queryBooks() {
+    const genre = document.getElementById("genre").value;
+    const min_conf = document.getElementById("min_conf").value;
+    const url = `http://localhost:5000/books?genre=${genre}&min_conf=${min_conf}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = '';
+        if (data.length === 0) {
+          resultsDiv.innerHTML = '<p>No books found matching your query.</p>';
+          return;
+        }
+
+        data.forEach(book => {
+          const div = document.createElement("div");
+          div.className = "book";
+          div.innerHTML = `
+            ${book.thumbnail_url ? `<img class="thumbnail" src="${book.thumbnail_url}" alt="Book cover" />` : ""}
+            <div class="book-details">
+              <h3>${book.title}</h3>
+              <div class="meta">
+                <strong>Genre:</strong> ${book.genre_predicted} &nbsp; | &nbsp;
+                <strong>Confidence:</strong> ${book.confidence} &nbsp; | &nbsp;
+                <strong>Rating:</strong> ${book.rating || 'N/A'}
+              </div>
+              <div class="description">${book.description}</div>
+            </div>
+          `;
+          resultsDiv.appendChild(div);
+        });
+      });
+  }
+</script>
+
+</body>
+</html>

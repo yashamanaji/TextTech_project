@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+  <start>
+    <element name="book">
+      <element name="title"><text/></element>
+      <element name="price"><text/></element>
+      <element name="availability"><text/></element>
+      <element name="rating"><text/></element>
+      <element name="description"><text/></element>
+      <element name="genre_actual"><text/></element>
+      <element name="genre_predicted"><text/></element>
+      <element name="confidence"><text/></element>
+      <element name="link"><text/></element>
+      <element name="thumbnail_url"><text/></element>
+    </element>
+  </start>
+
+</grammar>

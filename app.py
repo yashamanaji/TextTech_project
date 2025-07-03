@@ -13,19 +13,40 @@ collection = db["books"]
 @app.route('/books', methods=['GET'])
 def get_books():
     genre = request.args.get('genre')
-    min_conf = float(request.args.get('min_conf', 0))
+    min_conf = request.args.get('min_conf', '0')
+    max_price = request.args.get('max_price', '1000000')
+    min_rating = request.args.get('min_rating', '0')
+
     query = {}
 
     if genre:
         query['genre_predicted'] = genre
-    if min_conf:
-        query['confidence'] = {"$gte": str(min_conf)}  # Mongo may store confidence as string
+
+    try:
+        min_conf = float(min_conf)
+        query['confidence'] = {"$gte": min_conf}
+    except:
+        pass
+
+    try:
+        max_price = float(max_price)
+        query['price'] = {"$lte": max_price}
+    except:
+        pass
+
+    try:
+        min_rating = int(min_rating)
+        query['rating'] = {"$gte": min_rating}
+    except:
+        pass
 
     results = collection.find(query)
+
     books = []
     for book in results:
-        book['_id'] = str(book['_id'])  # Make ObjectId serializable
+        book['_id'] = str(book['_id'])
         books.append(book)
+    
     return jsonify(books)
 
 if __name__ == '__main__':

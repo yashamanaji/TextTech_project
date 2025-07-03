@@ -102,7 +102,7 @@
 <body>
 
 <header>
-  <h1>Book Catalog Query</h1>
+  <h1>Automatic Book Genre Classifier with XML Metadata Encoding</h1>
 </header>
 
 <div class="container">
@@ -111,6 +111,12 @@
   
   <label>Minimum Confidence:</label><br>
   <input type="number" id="min_conf" step="0.01" value="0.8" /><br>
+
+  <label>Max Price (€):</label><br>
+  <input type="number" id="max_price" step="0.01" placeholder="e.g. 10.00"><br><br>
+
+  <label>Minimum Rating (1–5):</label><br>
+  <input type="number" id="min_rating"  step="0.01" min="1" max="5" value="3"><br><br>
   
   <button onclick="queryBooks()">Search</button>
 
@@ -122,28 +128,44 @@
   function queryBooks() {
     const genre = document.getElementById("genre").value;
     const min_conf = document.getElementById("min_conf").value;
-    const url = `http://localhost:5000/books?genre=${genre}&min_conf=${min_conf}`;
+    const max_price = document.getElementById("max_price").value;
+    const min_rating = document.getElementById("min_rating").value;
+
+    let url = `http://localhost:5000/books?genre=${genre}&min_conf=${min_conf}`;
+    if (max_price) url += `&max_price=${max_price}`;
+    if (min_rating) url += `&min_rating=${min_rating}`;
 
     fetch(url)
       .then(res => res.json())
       .then(data => {
         const resultsDiv = document.getElementById("results");
         resultsDiv.innerHTML = '';
+
+        // 🔢 Show result count
+        const countDiv = document.createElement("div");
+        countDiv.style.marginBottom = "20px";
+        countDiv.style.fontWeight = "bold";
         if (data.length === 0) {
-          resultsDiv.innerHTML = '<p>No books found matching your query.</p>';
+          countDiv.textContent = "No books found matching your query.";
+          resultsDiv.appendChild(countDiv);
           return;
+        } else {
+          countDiv.textContent = `Found ${data.length} matching book${data.length > 1 ? 's' : ''}`;
+          resultsDiv.appendChild(countDiv);
         }
 
+        // 📚 Render results
         data.forEach(book => {
           const div = document.createElement("div");
           div.className = "book";
           div.innerHTML = `
-            ${book.thumbnail_url ? `<img class="thumbnail" src="${book.thumbnail_url}" alt="Book cover" />` : ""}
+            ${book.thumbnail_url ? `<img class="thumbnail" src="${book.thumbnail_url}" />` : ""}
             <div class="book-details">
               <h3>${book.title}</h3>
               <div class="meta">
-                <strong>Genre:</strong> ${book.genre_predicted} &nbsp; | &nbsp;
-                <strong>Confidence:</strong> ${book.confidence} &nbsp; | &nbsp;
+                <strong>Genre:</strong> ${book.genre_predicted} |
+                <strong>Confidence:</strong> ${book.confidence} |
+                <strong>Price:</strong> €${book.price} |
                 <strong>Rating:</strong> ${book.rating || 'N/A'}
               </div>
               <div class="description">${book.description}</div>
